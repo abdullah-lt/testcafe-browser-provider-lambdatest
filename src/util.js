@@ -46,7 +46,7 @@ async function requestApi (options) {
 function IsJsonString (str) {
     try {
         return JSON.parse(str);
-    } 
+    }
     catch (e) {
         return false;
     }
@@ -110,16 +110,16 @@ async function _destroy () {
     try {
         if (connectorInstance) {
             const tunnelName = await connectorInstance.getTunnelName();
-            
+
             showTrace('Stopping Tunnel :', tunnelName);
             await connectorInstance.stop();
             connectorInstance = null;
         }
-    } 
+    }
     catch (err) {
         showTrace('util._destroy error :', err);
     }
-    
+
 }
 async function _parseCapabilities (id, capability) {
     try {
@@ -129,7 +129,7 @@ async function _parseCapabilities (id, capability) {
         const browserVersion = parseCapabilitiesData.browserVersion;
         const platform = parseCapabilitiesData.platform;
         const lPlatform = platform.toLowerCase();
-        
+
         capabilities[id] = {
             tunnel: true,
 
@@ -169,7 +169,7 @@ async function _parseCapabilities (id, capability) {
         else {
             try {
                 const _isRunning = connectorInstance && await connectorInstance.isRunning();
-            
+
                 if (!_isRunning) {
                     await _destroy();
                     retryCounter = 60;
@@ -197,7 +197,12 @@ async function _parseCapabilities (id, capability) {
         if (capabilities[id].platform === 'any') delete capabilities[id].platform;
         if (PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === true || PROCESS_ENVIRONMENT.LT_SAFARI_COOKIES === 'true') capabilities[id]['safari.cookies'] = true;
         if (PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === true || PROCESS_ENVIRONMENT.LT_SAFARI_POPUPS === 'true') capabilities[id]['safari.popups'] = true;
-        
+
+        if (browserName.toLowerCase() === 'firefox' && browserVersion.split(".")[0] > 47 && !capabilities[id].hasOwnProperty('enableCustomTranslation')) {
+            capabilities[id].enableCustomTranslation = true
+        }
+
+
         showTrace('Parsed Capabilities ', capabilities[id]);
 
         return capabilities[id];
@@ -209,7 +214,7 @@ async function _parseCapabilities (id, capability) {
 }
 async function _updateJobStatus (sessionID, jobResult, jobData, possibleResults) {
     showTrace('Update Test Status called for ', sessionID);
-        
+
     const testsFailed = jobResult === possibleResults.done ? jobData.total - jobData.passed : 0;
     const jobPassed = jobResult === possibleResults.done && testsFailed === 0;
 
